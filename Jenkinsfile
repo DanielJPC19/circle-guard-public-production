@@ -57,9 +57,6 @@ pipeline {
                     echo "==> Esperando que Redis esté listo..."
                     kubectl rollout status deployment/redis -n ${env.NAMESPACE} --timeout=3m
 
-                    echo "==> Esperando que Zookeeper esté listo..."
-                    kubectl rollout status deployment/zookeeper -n ${env.NAMESPACE} --timeout=3m
-
                     echo "==> Esperando que Kafka esté listo..."
                     kubectl rollout status deployment/kafka -n ${env.NAMESPACE} --timeout=4m
 
