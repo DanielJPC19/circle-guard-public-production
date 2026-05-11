@@ -58,10 +58,10 @@ pipeline {
                     kubectl rollout status deployment/redis -n ${env.NAMESPACE} --timeout=3m
 
                     echo "==> Esperando que Zookeeper esté listo..."
-                    kubectl rollout status deployment/kafka-zookeeper -n ${env.NAMESPACE} --timeout=3m
+                    kubectl rollout status deployment/zookeeper -n ${env.NAMESPACE} --timeout=3m
 
                     echo "==> Esperando que Kafka esté listo..."
-                    kubectl rollout status deployment/kafka-broker -n ${env.NAMESPACE} --timeout=4m
+                    kubectl rollout status deployment/kafka -n ${env.NAMESPACE} --timeout=4m
 
                     echo "==> Esperando que Neo4j esté listo..."
                     kubectl rollout status deployment/neo4j -n ${env.NAMESPACE} --timeout=5m
@@ -105,8 +105,8 @@ pipeline {
         stage("Apply Secrets") {
             steps {
                 sh """
-                    kubectl apply -f k8s/middleware/secrets.yaml -n ${env.NAMESPACE}
-                    echo "==> Secrets aplicados en ${env.NAMESPACE}"
+                    kubectl apply -f k8s/middleware/ -n ${env.NAMESPACE}
+                    echo "==> ConfigMap y Secrets aplicados en ${env.NAMESPACE}"
                 """
             }
         }
@@ -116,10 +116,19 @@ pipeline {
             when { expression { params.ENVIRONMENT == 'staging' } }
             steps {
                 sh """
-                    echo "==> Limpiando schema public en circleguard-stage para fresh Flyway migrations..."
-                    kubectl exec -n ${env.NAMESPACE} postgres-0 -- psql -U admin -d circleguard \\
-                      -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
-                    echo "==> Schema reseteado correctamente"
+                    echo "==> Recreando databases de staging para fresh Flyway migrations..."
+                    kubectl exec -n ${env.NAMESPACE} postgres-0 -- psql -U admin \\
+                      -c "DROP DATABASE IF EXISTS circleguard_auth WITH (FORCE);" \\
+                      -c "CREATE DATABASE circleguard_auth;" \\
+                      -c "DROP DATABASE IF EXISTS circleguard_identity WITH (FORCE);" \\
+                      -c "CREATE DATABASE circleguard_identity;" \\
+                      -c "DROP DATABASE IF EXISTS circleguard_form WITH (FORCE);" \\
+                      -c "CREATE DATABASE circleguard_form;" \\
+                      -c "DROP DATABASE IF EXISTS circleguard_promotion WITH (FORCE);" \\
+                      -c "CREATE DATABASE circleguard_promotion;" \\
+                      -c "DROP DATABASE IF EXISTS circleguard_gateway WITH (FORCE);" \\
+                      -c "CREATE DATABASE circleguard_gateway;"
+                    echo "==> Databases recreadas correctamente"
                 """
             }
         }

@@ -27,12 +27,12 @@ spec:
               memory: 1Gi
           env:
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
-              value: circleguard-kafka:9092
+              value: kafka:9092
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: app-secrets
-                  key: jwt-secret
+                  name: circleguard-secret
+                  key: JWT_SECRET
             - name: AUTH_API_URL
               value: "http://auth-service:8180"
             - name: SPRING_MAIL_HOST

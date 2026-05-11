@@ -27,56 +27,49 @@ spec:
               memory: 1Gi
           env:
             - name: SPRING_DATASOURCE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: db-secrets
-                  key: auth-db-url
+              value: jdbc:postgresql://postgres:5432/circleguard_auth
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
-                secretKeyRef:
-                  name: db-secrets
-                  key: db-username
+                configMapKeyRef:
+                  name: circleguard-config
+                  key: POSTGRES_USER
             - name: SPRING_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: db-secrets
-                  key: db-password
+                  name: circleguard-secret
+                  key: POSTGRES_PASSWORD
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
-              value: circleguard-kafka:9092
+              value: kafka:9092
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: app-secrets
-                  key: jwt-secret
-            - name: SPRING_LDAP_URLS
-              valueFrom:
-                secretKeyRef:
-                  name: app-secrets
-                  key: ldap-url
-            - name: SPRING_LDAP_BASE
-              valueFrom:
-                secretKeyRef:
-                  name: app-secrets
-                  key: ldap-base-dn
-            - name: SPRING_LDAP_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: app-secrets
-                  key: ldap-manager-dn
-            - name: SPRING_LDAP_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: app-secrets
-                  key: ldap-manager-password
+                  name: circleguard-secret
+                  key: JWT_SECRET
             - name: QR_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: app-secrets
-                  key: qr-secret
-            - name: SPRING_FLYWAY_TABLE
-              value: "flyway_auth"
-            - name: SPRING_FLYWAY_VALIDATE_ON_MIGRATE
-              value: "false"
+                  name: circleguard-secret
+                  key: QR_SECRET
+            - name: SPRING_LDAP_URLS
+              valueFrom:
+                secretKeyRef:
+                  name: circleguard-secret
+                  key: LDAP_URL
+            - name: SPRING_LDAP_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: circleguard-secret
+                  key: LDAP_BASE_DN
+            - name: SPRING_LDAP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: circleguard-secret
+                  key: LDAP_MANAGER_DN
+            - name: SPRING_LDAP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: circleguard-secret
+                  key: LDAP_MANAGER_PASSWORD
 ---
 apiVersion: v1
 kind: Service

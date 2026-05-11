@@ -27,46 +27,39 @@ spec:
               memory: 1Gi
           env:
             - name: SPRING_DATASOURCE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: db-secrets
-                  key: identity-db-url
+              value: jdbc:postgresql://postgres:5432/circleguard_identity
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
-                secretKeyRef:
-                  name: db-secrets
-                  key: db-username
+                configMapKeyRef:
+                  name: circleguard-config
+                  key: POSTGRES_USER
             - name: SPRING_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: db-secrets
-                  key: db-password
+                  name: circleguard-secret
+                  key: POSTGRES_PASSWORD
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
-              value: circleguard-kafka:9092
+              value: kafka:9092
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: app-secrets
-                  key: jwt-secret
+                  name: circleguard-secret
+                  key: JWT_SECRET
             - name: VAULT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: app-secrets
-                  key: vault-secret
+                  name: circleguard-secret
+                  key: VAULT_SECRET
             - name: VAULT_SALT
               valueFrom:
                 secretKeyRef:
-                  name: app-secrets
-                  key: vault-salt
+                  name: circleguard-secret
+                  key: VAULT_SALT
             - name: VAULT_HASH_SALT
               valueFrom:
                 secretKeyRef:
-                  name: app-secrets
-                  key: vault-hash-salt
-            - name: SPRING_FLYWAY_TABLE
-              value: "flyway_identity"
-            - name: SPRING_FLYWAY_VALIDATE_ON_MIGRATE
-              value: "false"
+                  name: circleguard-secret
+                  key: VAULT_HASH_SALT
 ---
 apiVersion: v1
 kind: Service

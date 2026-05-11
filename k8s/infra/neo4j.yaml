@@ -1,7 +1,3 @@
-# Neo4j for CircleGuard
-# Service name: circleguard-neo4j:7687 (bolt) — matches SPRING_NEO4J_URI in promotion-service
-# Auth: neo4j/password — matches SPRING_NEO4J_AUTHENTICATION_PASSWORD
-# enableServiceLinks: false prevents K8s from injecting NEO4J_PORT env var that breaks Neo4j startup
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -54,7 +50,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: circleguard-neo4j
+  name: neo4j
 spec:
   type: ClusterIP
   selector:
