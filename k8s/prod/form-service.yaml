@@ -27,7 +27,7 @@ spec:
               memory: 1Gi
           env:
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:postgresql://postgres:5432/circleguard_form
+              value: jdbc:postgresql://circleguard-postgres:5432/circleguard_form
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 configMapKeyRef:
@@ -39,7 +39,7 @@ spec:
                   name: circleguard-secret
                   key: POSTGRES_PASSWORD
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
-              value: kafka:9092
+              value: circleguard-kafka:9092
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
