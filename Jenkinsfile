@@ -44,6 +44,17 @@ pipeline {
             }
         }
 
+        // ── Stage 1b: Crear namespace si no existe ───────────────────────────
+        stage("Create Namespace") {
+            steps {
+                sh """
+                    echo "==> Creando namespace ${env.NAMESPACE} si no existe..."
+                    kubectl create namespace ${env.NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+                    echo "==> Namespace ${env.NAMESPACE} listo"
+                """
+            }
+        }
+
         // ── Stage 2: Desplegar middleware (idempotente con kubectl apply) ──
         stage("Deploy Middleware") {
             steps {
