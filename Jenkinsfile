@@ -111,6 +111,19 @@ pipeline {
             }
         }
 
+        // ── Stage 5b: Reset DB en staging (schema limpio antes de cada deploy) ─
+        stage("Reset Stage DB") {
+            when { expression { params.ENVIRONMENT == 'staging' } }
+            steps {
+                sh """
+                    echo "==> Limpiando schema public en circleguard-stage para fresh Flyway migrations..."
+                    kubectl exec -n ${env.NAMESPACE} postgres-0 -- psql -U admin -d circleguard \\
+                      -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+                    echo "==> Schema reseteado correctamente"
+                """
+            }
+        }
+
         // ── Stage 6: Desplegar ────────────────────────────────────────────────
         stage("Deploy") {
             steps {
