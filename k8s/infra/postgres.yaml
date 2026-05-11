@@ -1,0 +1,89 @@
+# PostgreSQL for CircleGuard
+# Service name: circleguard-postgres:5432 (matches SPRING_DATASOURCE_URL en secrets.yaml)
+# Usuario: admin / password: password / database: circleguard
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  serviceName: postgres-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: admin
+            - name: POSTGRES_PASSWORD
+              value: password
+            - name: POSTGRES_DB
+              value: circleguard
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            exec:
+              command: [/bin/sh, -c, pg_isready -U admin -d circleguard]
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            exec:
+              command: [/bin/sh, -c, pg_isready -U admin -d circleguard]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-storage
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 5Gi
+---
+# Headless service requerido por el StatefulSet
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-headless
+spec:
+  clusterIP: None
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+# Service ClusterIP para que los microservicios puedan conectarse por nombre
+apiVersion: v1
+kind: Service
+metadata:
+  name: circleguard-postgres
+spec:
+  type: ClusterIP
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432

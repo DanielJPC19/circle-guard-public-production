@@ -44,44 +44,27 @@ pipeline {
             }
         }
 
-        // ── Stage 2: Instalar/actualizar middleware con Helm ────────────────
-        stage("Setup Middleware") {
+        // ── Stage 2: Desplegar middleware (idempotente con kubectl apply) ──
+        stage("Deploy Middleware") {
             steps {
                 sh """
-                    echo "==> Configurando middleware en ${env.NAMESPACE}..."
+                    echo "==> Aplicando manifiestos de infraestructura en ${env.NAMESPACE}..."
+                    kubectl apply -f k8s/infra/ -n ${env.NAMESPACE}
 
-                    helm version || { echo "ERROR: helm no está instalado en el contenedor Jenkins. Ejecuta en la VM: docker exec -u root jenkins bash -c 'curl -fsSL https://get.helm.sh/helm-v3.14.4-linux-amd64.tar.gz -o /tmp/helm.tar.gz && tar -xzf /tmp/helm.tar.gz -C /tmp && mv /tmp/linux-amd64/helm /usr/local/bin/helm'"; exit 1; }
+                    echo "==> Esperando que Postgres esté listo..."
+                    kubectl rollout status statefulset/postgres -n ${env.NAMESPACE} --timeout=5m
 
-                    helm repo add bitnami https://charts.bitnami.com/bitnami 2>/dev/null || true
-                    helm repo add neo4j   https://helm.neo4j.com/neo4j        2>/dev/null || true
-                    helm repo update
+                    echo "==> Esperando que Redis esté listo..."
+                    kubectl rollout status deployment/redis -n ${env.NAMESPACE} --timeout=3m
 
-                    helm upgrade --install circleguard-postgres bitnami/postgresql \\
-                        --namespace ${env.NAMESPACE} \\
-                        --set auth.username=admin \\
-                        --set auth.password=password \\
-                        --set auth.database=circleguard \\
-                        --set primary.persistence.size=5Gi \\
-                        --wait --timeout=5m
+                    echo "==> Esperando que Zookeeper esté listo..."
+                    kubectl rollout status deployment/kafka-zookeeper -n ${env.NAMESPACE} --timeout=3m
 
-                    helm upgrade --install circleguard-redis bitnami/redis \\
-                        --namespace ${env.NAMESPACE} \\
-                        --set auth.enabled=false \\
-                        --set master.persistence.size=2Gi \\
-                        --wait --timeout=5m
+                    echo "==> Esperando que Kafka esté listo..."
+                    kubectl rollout status deployment/kafka-broker -n ${env.NAMESPACE} --timeout=4m
 
-                    helm upgrade --install circleguard-kafka bitnami/kafka \\
-                        --namespace ${env.NAMESPACE} \\
-                        --set kraft.enabled=true \\
-                        --set replicaCount=1 \\
-                        --set persistence.size=5Gi \\
-                        --wait --timeout=8m
-
-                    helm upgrade --install circleguard-neo4j neo4j/neo4j \\
-                        --namespace ${env.NAMESPACE} \\
-                        --set neo4j.password=password \\
-                        --set volumes.data.requests.storage=5Gi \\
-                        --wait --timeout=8m
+                    echo "==> Esperando que Neo4j esté listo..."
+                    kubectl rollout status deployment/neo4j -n ${env.NAMESPACE} --timeout=5m
 
                     echo "==> Middleware listo en ${env.NAMESPACE}"
                 """

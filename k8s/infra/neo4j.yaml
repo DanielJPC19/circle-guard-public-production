@@ -1,0 +1,88 @@
+# Neo4j for CircleGuard
+# Service name: circleguard-neo4j:7687 (bolt) — matches SPRING_NEO4J_URI in promotion-service
+# Auth: neo4j/password — matches SPRING_NEO4J_AUTHENTICATION_PASSWORD
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neo4j
+  labels:
+    app: neo4j
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: neo4j
+  template:
+    metadata:
+      labels:
+        app: neo4j
+    spec:
+      containers:
+        - name: neo4j
+          image: neo4j:5.26-community
+          ports:
+            - containerPort: 7474
+              name: http
+            - containerPort: 7687
+              name: bolt
+          env:
+            - name: NEO4J_AUTH
+              value: "neo4j/password"
+            - name: NEO4J_dbms_memory_heap_initial__size
+              value: "128m"
+            - name: NEO4J_dbms_memory_heap_max__size
+              value: "256m"
+            - name: NEO4J_server_memory_pagecache_size
+              value: "64m"
+            - name: NEO4J_server_config_strict__validation_enabled
+              value: "false"
+            - name: NEO4J_server_bolt_listen__address
+              value: "0.0.0.0:7687"
+            - name: NEO4J_server_http_listen__address
+              value: "0.0.0.0:7474"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 768Mi
+          livenessProbe:
+            httpGet:
+              path: /db/neo4j/status
+              port: 7474
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /db/neo4j/status
+              port: 7474
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          volumeMounts:
+            - name: neo4j-data
+              mountPath: /var/lib/neo4j/data
+            - name: neo4j-logs
+              mountPath: /var/lib/neo4j/logs
+      volumes:
+        - name: neo4j-data
+          emptyDir: {}
+        - name: neo4j-logs
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: circleguard-neo4j
+spec:
+  type: ClusterIP
+  selector:
+    app: neo4j
+  ports:
+    - port: 7687
+      targetPort: 7687
+      name: bolt
+    - port: 7474
+      targetPort: 7474
+      name: http
