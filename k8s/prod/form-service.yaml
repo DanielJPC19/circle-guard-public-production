@@ -48,6 +48,8 @@ spec:
                 secretKeyRef:
                   name: app-secrets
                   key: jwt-secret
+            - name: SPRING_FLYWAY_VALIDATE_ON_MIGRATE
+              value: "false"
 ---
 apiVersion: v1
 kind: Service

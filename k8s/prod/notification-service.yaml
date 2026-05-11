@@ -35,8 +35,10 @@ spec:
                   key: jwt-secret
             - name: AUTH_API_URL
               value: "http://auth-service:8180"
-            - name: SPRING_AUTOCONFIGURE_EXCLUDE
-              value: "org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration"
+            - name: SPRING_MAIL_HOST
+              value: "localhost"
+            - name: SPRING_MAIL_PORT
+              value: "25"
 ---
 apiVersion: v1
 kind: Service
