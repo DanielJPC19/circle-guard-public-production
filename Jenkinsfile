@@ -167,23 +167,26 @@ pipeline {
                     env.GATEWAY_IP = ip
                     echo "==> Gateway IP: ${ip}"
 
+                    echo "==> Esperando 90s para que Spring Boot inicialice completamente..."
+                    sleep 90
+
                     def healthy = false
-                    for (int i = 1; i <= 10; i++) {
+                    for (int i = 1; i <= 24; i++) {
                         def status = sh(
-                            script: "curl -sf http://${ip}:8087/actuator/health",
+                            script: "curl -sf --max-time 10 http://${ip}:8087/actuator/health",
                             returnStatus: true
                         )
                         if (status == 0) {
-                            echo "==> Health check exitoso en intento ${i}/10"
+                            echo "==> Health check exitoso en intento ${i}/24"
                             healthy = true
                             break
                         }
-                        echo "==> Intento ${i}/10 fallido — esperando 10s..."
-                        sleep 10
+                        echo "==> Intento ${i}/24 fallido — esperando 15s..."
+                        sleep 15
                     }
 
                     if (!healthy) {
-                        error("Health check fallido tras 10 intentos. Gateway no responde en http://${ip}:8087/actuator/health")
+                        error("Health check fallido tras 24 intentos. Gateway no responde en http://${ip}:8087/actuator/health")
                     }
                 }
             }

@@ -49,7 +49,7 @@ spec:
                   name: app-secrets
                   key: jwt-secret
             - name: SPRING_DATA_REDIS_HOST
-              value: circleguard-redis-master
+              value: redis
             - name: SPRING_DATA_REDIS_PORT
               value: "6379"
             - name: QR_SECRET
