@@ -52,14 +52,16 @@ spec:
             httpGet:
               path: /db/neo4j/status
               port: 7474
-            initialDelaySeconds: 60
+            initialDelaySeconds: 90
             periodSeconds: 30
+            failureThreshold: 5
           readinessProbe:
             httpGet:
               path: /db/neo4j/status
               port: 7474
-            initialDelaySeconds: 30
-            periodSeconds: 10
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            failureThreshold: 8
           volumeMounts:
             - name: neo4j-data
               mountPath: /var/lib/neo4j/data
