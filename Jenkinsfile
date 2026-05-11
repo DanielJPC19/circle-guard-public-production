@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     parameters {
-        string(name: "IMAGE_TAG",   defaultValue: "latest",    description: "Docker image tag to deploy")
+        string(name: "IMAGE_TAG",   defaultValue: "staging",   description: "Docker image tag to deploy (staging | latest | vN | SHA)")
         choice(name: "ENVIRONMENT", choices: ["staging", "production"], description: "Target environment")
     }
 
