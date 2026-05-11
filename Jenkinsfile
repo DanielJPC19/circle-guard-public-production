@@ -64,7 +64,7 @@ pipeline {
                     kubectl rollout status deployment/kafka-broker -n ${env.NAMESPACE} --timeout=4m
 
                     echo "==> Esperando que Neo4j esté listo..."
-                    kubectl rollout status deployment/neo4j -n ${env.NAMESPACE} --timeout=8m
+                    kubectl rollout status deployment/neo4j -n ${env.NAMESPACE} --timeout=5m
 
                     echo "==> Middleware listo en ${env.NAMESPACE}"
                 """
