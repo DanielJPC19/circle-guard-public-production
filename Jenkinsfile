@@ -44,7 +44,53 @@ pipeline {
             }
         }
 
-        // ── Stage 2: Validar manifiestos sin aplicar ─────────────────────────
+        // ── Stage 2: Instalar/actualizar middleware con Helm ────────────────
+        stage("Setup Middleware") {
+            steps {
+                sh """
+                    echo "==> Configurando middleware en ${env.NAMESPACE}..."
+
+                    if ! command -v helm &>/dev/null; then
+                        curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+                    fi
+
+                    helm repo add bitnami https://charts.bitnami.com/bitnami 2>/dev/null || true
+                    helm repo add neo4j   https://helm.neo4j.com/neo4j        2>/dev/null || true
+                    helm repo update
+
+                    helm upgrade --install circleguard-postgres bitnami/postgresql \\
+                        --namespace ${env.NAMESPACE} \\
+                        --set auth.username=admin \\
+                        --set auth.password=password \\
+                        --set auth.database=circleguard \\
+                        --set primary.persistence.size=5Gi \\
+                        --wait --timeout=5m
+
+                    helm upgrade --install circleguard-redis bitnami/redis \\
+                        --namespace ${env.NAMESPACE} \\
+                        --set auth.enabled=false \\
+                        --set master.persistence.size=2Gi \\
+                        --wait --timeout=5m
+
+                    helm upgrade --install circleguard-kafka bitnami/kafka \\
+                        --namespace ${env.NAMESPACE} \\
+                        --set kraft.enabled=true \\
+                        --set replicaCount=1 \\
+                        --set persistence.size=5Gi \\
+                        --wait --timeout=8m
+
+                    helm upgrade --install circleguard-neo4j neo4j/neo4j \\
+                        --namespace ${env.NAMESPACE} \\
+                        --set neo4j.password=password \\
+                        --set volumes.data.requests.storage=5Gi \\
+                        --wait --timeout=8m
+
+                    echo "==> Middleware listo en ${env.NAMESPACE}"
+                """
+            }
+        }
+
+        // ── Stage 3: Validar manifiestos sin aplicar ─────────────────────────
         stage("Validate Manifests") {
             steps {
                 sh """
@@ -57,7 +103,7 @@ pipeline {
             }
         }
 
-        // ── Stage 3: Actualizar image tags en los YAMLs ──────────────────────
+        // ── Stage 4: Actualizar image tags en los YAMLs ──────────────────────
         stage("Update Image Tags") {
             steps {
                 script {
@@ -71,7 +117,7 @@ pipeline {
             }
         }
 
-        // ── Stage 4: Aplicar secrets ─────────────────────────────────────────
+        // ── Stage 5: Aplicar secrets ─────────────────────────────────────────
         stage("Apply Secrets") {
             steps {
                 sh """
@@ -81,7 +127,7 @@ pipeline {
             }
         }
 
-        // ── Stage 5: Desplegar ────────────────────────────────────────────────
+        // ── Stage 6: Desplegar ────────────────────────────────────────────────
         stage("Deploy") {
             steps {
                 sh """
@@ -91,7 +137,7 @@ pipeline {
             }
         }
 
-        // ── Stage 6: Verificar rollout con rollback automático ───────────────
+        // ── Stage 7: Verificar rollout con rollback automático ───────────────
         stage("Rollout Verification") {
             steps {
                 script {
@@ -100,8 +146,9 @@ pipeline {
 
                     for (int i = 0; i < servicesList.size(); i++) {
                         def svc = servicesList[i]
+                        sh "kubectl rollout restart deployment/${svc} -n ${env.NAMESPACE}"
                         def result = sh(
-                            script: "kubectl rollout status deployment/${svc} -n ${env.NAMESPACE} --timeout=5m",
+                            script: "kubectl rollout status deployment/${svc} -n ${env.NAMESPACE} --timeout=10m",
                             returnStatus: true
                         )
                         if (result != 0) {
@@ -120,7 +167,7 @@ pipeline {
             }
         }
 
-        // ── Stage 7: Health Check del Gateway ────────────────────────────────
+        // ── Stage 8: Health Check del Gateway ────────────────────────────────
         stage("Health Check") {
             steps {
                 script {
@@ -158,7 +205,7 @@ pipeline {
             }
         }
 
-        // ── Stage 8: Resumen del despliegue ──────────────────────────────────
+        // ── Stage 9: Resumen del despliegue ──────────────────────────────────
         stage("Deployment Summary") {
             steps {
                 script {

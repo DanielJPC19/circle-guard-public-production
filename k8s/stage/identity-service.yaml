@@ -48,6 +48,21 @@ spec:
                 secretKeyRef:
                   name: app-secrets
                   key: jwt-secret
+            - name: VAULT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: vault-secret
+            - name: VAULT_SALT
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: vault-salt
+            - name: VAULT_HASH_SALT
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: vault-hash-salt
           livenessProbe:
             httpGet:
               path: /actuator/health

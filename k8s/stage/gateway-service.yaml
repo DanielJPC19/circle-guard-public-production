@@ -48,10 +48,15 @@ spec:
                 secretKeyRef:
                   name: app-secrets
                   key: jwt-secret
-            - name: SPRING_REDIS_HOST
+            - name: SPRING_DATA_REDIS_HOST
               value: circleguard-redis-master
-            - name: SPRING_REDIS_PORT
+            - name: SPRING_DATA_REDIS_PORT
               value: "6379"
+            - name: QR_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: qr-secret
           livenessProbe:
             httpGet:
               path: /actuator/health

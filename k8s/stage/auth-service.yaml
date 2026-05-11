@@ -68,6 +68,11 @@ spec:
                 secretKeyRef:
                   name: app-secrets
                   key: ldap-manager-password
+            - name: QR_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: qr-secret
           livenessProbe:
             httpGet:
               path: /actuator/health

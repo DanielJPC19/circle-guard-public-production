@@ -48,10 +48,16 @@ spec:
                 secretKeyRef:
                   name: app-secrets
                   key: jwt-secret
-            - name: NEO4J_URI
+            - name: SPRING_NEO4J_URI
               value: bolt://circleguard-neo4j:7687
-            - name: NEO4J_AUTHENTICATION_PASSWORD
+            - name: SPRING_NEO4J_AUTHENTICATION_USERNAME
+              value: neo4j
+            - name: SPRING_NEO4J_AUTHENTICATION_PASSWORD
               value: password
+            - name: SPRING_DATA_REDIS_HOST
+              value: circleguard-redis-master
+            - name: SPRING_DATA_REDIS_PORT
+              value: "6379"
           livenessProbe:
             httpGet:
               path: /actuator/health
