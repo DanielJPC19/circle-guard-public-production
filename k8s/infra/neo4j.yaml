@@ -1,3 +1,7 @@
+# Neo4j for CircleGuard
+# Service name: circleguard-neo4j:7687 (bolt) — matches SPRING_NEO4J_URI in promotion-service
+# Auth: neo4j/password — matches SPRING_NEO4J_AUTHENTICATION_PASSWORD
+# enableServiceLinks: false prevents K8s from injecting NEO4J_PORT env var that breaks Neo4j startup
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -29,16 +33,6 @@ spec:
               value: "neo4j/password"
             - name: NEO4J_server_config_strict__validation_enabled
               value: "false"
-            - name: NEO4J_dbms_memory_heap_initial__size
-              value: "128m"
-            - name: NEO4J_dbms_memory_heap_max__size
-              value: "256m"
-            - name: NEO4J_server_memory_pagecache_size
-              value: "64m"
-            - name: NEO4J_server_bolt_listen__address
-              value: "0.0.0.0:7687"
-            - name: NEO4J_server_http_listen__address
-              value: "0.0.0.0:7474"
           resources:
             requests:
               cpu: 100m
@@ -46,20 +40,6 @@ spec:
             limits:
               cpu: 500m
               memory: 768Mi
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 7474
-            initialDelaySeconds: 60
-            periodSeconds: 30
-            failureThreshold: 3
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 7474
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            failureThreshold: 3
           volumeMounts:
             - name: neo4j-data
               mountPath: /var/lib/neo4j/data
@@ -74,7 +54,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: neo4j
+  name: circleguard-neo4j
 spec:
   type: ClusterIP
   selector:
