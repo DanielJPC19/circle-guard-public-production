@@ -57,6 +57,10 @@ spec:
                 secretKeyRef:
                   name: app-secrets
                   key: qr-secret
+            - name: SPRING_FLYWAY_TABLE
+              value: "flyway_gateway"
+            - name: SPRING_FLYWAY_VALIDATE_ON_MIGRATE
+              value: "false"
 ---
 apiVersion: v1
 kind: Service
