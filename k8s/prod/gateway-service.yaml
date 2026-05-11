@@ -4,7 +4,7 @@ metadata:
   name: gateway-service
   namespace: circleguard-prod
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: gateway-service
@@ -57,18 +57,6 @@ spec:
                 secretKeyRef:
                   name: app-secrets
                   key: qr-secret
-          livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8087
-            initialDelaySeconds: 60
-            periodSeconds: 15
-          readinessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8087
-            initialDelaySeconds: 30
-            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service

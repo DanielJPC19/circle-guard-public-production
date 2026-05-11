@@ -1,0 +1,65 @@
+# OpenLDAP for CircleGuard auth-service
+# Service name: circleguard-openldap:389 — matches SPRING_LDAP_URLS in app-secrets
+# Admin DN: cn=admin,dc=circleguard,dc=edu / password: password (matches ldap-manager-password secret)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openldap
+  labels:
+    app: openldap
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openldap
+  template:
+    metadata:
+      labels:
+        app: openldap
+    spec:
+      containers:
+        - name: openldap
+          image: osixia/openldap:1.5.0
+          ports:
+            - containerPort: 389
+              name: ldap
+          env:
+            - name: LDAP_ORGANISATION
+              value: "CircleGuard"
+            - name: LDAP_DOMAIN
+              value: "circleguard.edu"
+            - name: LDAP_ADMIN_PASSWORD
+              value: "password"
+            - name: LDAP_TLS
+              value: "false"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          volumeMounts:
+            - name: ldap-data
+              mountPath: /var/lib/ldap
+            - name: ldap-config
+              mountPath: /etc/ldap/slapd.d
+      volumes:
+        - name: ldap-data
+          emptyDir: {}
+        - name: ldap-config
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: circleguard-openldap
+spec:
+  type: ClusterIP
+  selector:
+    app: openldap
+  ports:
+    - port: 389
+      targetPort: 389
+      name: ldap

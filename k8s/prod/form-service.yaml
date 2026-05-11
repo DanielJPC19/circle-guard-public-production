@@ -4,7 +4,7 @@ metadata:
   name: form-service
   namespace: circleguard-prod
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: form-service
@@ -48,18 +48,6 @@ spec:
                 secretKeyRef:
                   name: app-secrets
                   key: jwt-secret
-          livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8086
-            initialDelaySeconds: 60
-            periodSeconds: 15
-          readinessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8086
-            initialDelaySeconds: 30
-            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service

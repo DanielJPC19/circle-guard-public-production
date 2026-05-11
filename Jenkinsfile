@@ -66,6 +66,9 @@ pipeline {
                     echo "==> Esperando que Neo4j esté listo..."
                     kubectl rollout status deployment/neo4j -n ${env.NAMESPACE} --timeout=5m
 
+                    echo "==> Esperando que OpenLDAP esté listo..."
+                    kubectl rollout status deployment/openldap -n ${env.NAMESPACE} --timeout=2m
+
                     echo "==> Middleware listo en ${env.NAMESPACE}"
                 """
             }

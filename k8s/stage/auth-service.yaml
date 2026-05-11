@@ -4,7 +4,7 @@ metadata:
   name: auth-service
   namespace: circleguard-stage
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: auth-service
@@ -73,18 +73,6 @@ spec:
                 secretKeyRef:
                   name: app-secrets
                   key: qr-secret
-          livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8180
-            initialDelaySeconds: 60
-            periodSeconds: 15
-          readinessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8180
-            initialDelaySeconds: 30
-            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service

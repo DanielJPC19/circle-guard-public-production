@@ -4,7 +4,7 @@ metadata:
   name: identity-service
   namespace: circleguard-stage
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: identity-service
@@ -63,18 +63,6 @@ spec:
                 secretKeyRef:
                   name: app-secrets
                   key: vault-hash-salt
-          livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8083
-            initialDelaySeconds: 60
-            periodSeconds: 15
-          readinessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8083
-            initialDelaySeconds: 30
-            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
