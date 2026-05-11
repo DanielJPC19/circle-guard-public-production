@@ -50,9 +50,7 @@ pipeline {
                 sh """
                     echo "==> Configurando middleware en ${env.NAMESPACE}..."
 
-                    if ! command -v helm &>/dev/null; then
-                        curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | USE_SUDO=false bash
-                    fi
+                    helm version || { echo "ERROR: helm no está instalado en el contenedor Jenkins. Ejecuta en la VM: docker exec -u root jenkins bash -c 'curl -fsSL https://get.helm.sh/helm-v3.14.4-linux-amd64.tar.gz -o /tmp/helm.tar.gz && tar -xzf /tmp/helm.tar.gz -C /tmp && mv /tmp/linux-amd64/helm /usr/local/bin/helm'"; exit 1; }
 
                     helm repo add bitnami https://charts.bitnami.com/bitnami 2>/dev/null || true
                     helm repo add neo4j   https://helm.neo4j.com/neo4j        2>/dev/null || true
