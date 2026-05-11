@@ -51,7 +51,7 @@ pipeline {
                     echo "==> Configurando middleware en ${env.NAMESPACE}..."
 
                     if ! command -v helm &>/dev/null; then
-                        curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+                        curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | USE_SUDO=false bash
                     fi
 
                     helm repo add bitnami https://charts.bitnami.com/bitnami 2>/dev/null || true
