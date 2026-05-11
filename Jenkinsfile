@@ -114,7 +114,7 @@ pipeline {
             steps {
                 sh """
                     echo "==> Recreando databases de staging para fresh Flyway migrations..."
-                    kubectl exec -n ${env.NAMESPACE} postgres-0 -- psql -U admin \\
+                    kubectl exec -n ${env.NAMESPACE} postgres-0 -- psql -U admin -d postgres \\
                       -c "DROP DATABASE IF EXISTS circleguard_auth WITH (FORCE);" \\
                       -c "CREATE DATABASE circleguard_auth;" \\
                       -c "DROP DATABASE IF EXISTS circleguard_identity WITH (FORCE);" \\
